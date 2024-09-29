@@ -31,6 +31,16 @@ export function fileExtension(path: string): string | null {
     return ext;
 }
 
+/** Get the basename of the given file path, and strip query parameters */
+export function fileBasename(path: string): string | null {
+    const filename = path.split(/[\\/]/).pop();
+    const basename = filename?.split(/\./).slice(0, -1).join(".");
+    if (basename == null || basename == "") {
+        throw new Error(`couldn't determine file basename for '${path}'`);
+    }
+    return basename;
+}
+
 /** Join two file paths. */
 export function joinPaths(first: string, second: string): string {
     return first.endsWith("/") ? first + second : first + "/" + second;

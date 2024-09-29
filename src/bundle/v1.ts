@@ -1,5 +1,5 @@
 import { AssetReferences } from "../assets";
-import { fileExtension, joinPaths, createDirs, checkVersions } from "../util";
+import { fileExtension, joinPaths, createDirs, checkVersions, fileBasename } from "../util";
 import { confirmOverwrite, downloadBundle } from "./common";
 import { IMPORT_ASSET_DIR } from "../settings";
 import JSZip from "jszip";
@@ -25,10 +25,16 @@ export async function exportBundleV1(
     originalAdventure: foundry.documents.BaseAdventure,
     assetReferences: AssetReferences
 ) {
+    const running_counts = new Map<string, number>();
     const remappedAssets = new Map(
-        Object.keys(assetReferences).map((originalSource, i) => {
+        Object.keys(assetReferences).map((originalSource) => {
             const ext = fileExtension(originalSource);
-            return [originalSource, `asset_${i}.${ext}`];
+            const basename = fileBasename(originalSource);
+            const filename = basename + "." + ext;
+            const instance = running_counts.get(filename) ?? 0;
+            running_counts.set(filename, instance + 1);
+            const basename_with_instance = instance > 0 ? `${basename}_${instance}` : basename;
+            return [originalSource, `${basename_with_instance}.${ext}`];
         })
     );
     console.log("Bundled asset mapping table created", remappedAssets);
